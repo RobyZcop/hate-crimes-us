@@ -18,7 +18,6 @@ The results of the analysis are **visualized in an interactive dashboard** hoste
 ## 🛠 Technologies Used  
 This project utilizes the following technologies:  
 - **R** – Data analysis & visualization  
-- **Shiny (R Dashboard)** – Interactive data visualization  
 - **ggplot2, dplyr** – Data processing and plotting  
 - **Excel (.csv dataset)** – Source data  
 - **RPubs** – Dashboard hosting  
