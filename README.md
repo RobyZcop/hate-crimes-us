@@ -6,7 +6,7 @@
 This project analyzes **Hate Crimes in the United States**, using data provided by the **Federal Bureau of Investigation (FBI)**. The main objective is to **gain insights into the distribution of hate crimes** and help inform government decisions regarding **resource allocation** and **awareness campaigns**.  
 
 The analysis explores different **bias motivations**, offender demographics, crime trends, and regional patterns. The results are visualized in an **interactive dashboard**, allowing users to explore the data dynamically.  
-
+*[Interactive Dashboard](https://rpubs.com/robyZsrCop/1024231)
 ---
 
 ## 🛠 Technologies Used  
