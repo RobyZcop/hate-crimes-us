@@ -28,7 +28,6 @@ This project utilizes the following technologies:
 ## 📂 Project Structure  
 ```plaintext
 📂 hate-crime-analysis
-│-- 📄 hate_crime.csv            # Hate crimes dataset (FBI)
 │-- 📄 hate-crime.Rmd            # R script for data analysis
 │-- 📄 hate-crime-dashboard.Rmd  # R script for the interactive dashboard
 │-- 📄 README.md                 # Project documentation
