@@ -45,7 +45,7 @@ The following **KPIs** were analyzed:
 ✔️ **Total Number of Hate Crime Cases each Year per Region**  
 ✔️ **Hate Crimes per bias motivation**  
 ✔️ **Average time between hate crimes for different bias types**
-✔️ **Average days between two crimes Per Bias Type**  
+✔️ **Average days between two crimes Per Bias Type**
 
 ---  
 
