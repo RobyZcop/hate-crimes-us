@@ -47,8 +47,6 @@ The following **KPIs** were analyzed:
 ✔️ **Average time between hate crimes for different bias types**
 ✔️ **Average days between two crimes Per Bias Type**
 
----  
-
 ## 🔍 Data Sources  
 - **Dataset:** [Hate Crime Report (1991-2020) – Kaggle](https://www.kaggle.com/code/lewanfuowski/hate-crime-report-from-1991-to-2020/data)  
 - **Original Source:** [FBI Crime Data Explorer](https://crime-data-explorer.app.cloud.gov/pages/downloads#nibrs-downloads)  
