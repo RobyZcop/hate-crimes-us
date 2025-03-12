@@ -1,0 +1,232 @@
+---
+title: "HateCrime"
+author: "Roberto Conti"
+date: "02/06/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# USE DURATION OR PERIOD forx exampale avg number of day between two crimes per eache reagion, show as table
+# wider
+# create join after filtering 'find regione wehich never had crimes certain type
+
+```{r}
+# Importing Library
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+```
+
+
+# Import  and cleaning the dataset
+During my cleaning:
+    I have dropped column that:
+       - I do not need in my analyis
+       - Column with just NA values
+       - Duplicate columns
+       
+```{r}
+
+#overview about the columns present in the imported dataSet
+ prova <- read_csv("hate_crime.csv") %>% str()
+
+prova
+#Just Select the column that I need 
+ hate_crimes <- read_csv("hate_crime.csv", 
+         col_select = c(
+                        "STATE_ABBR", 
+                        "STATE_NAME","DIVISION_NAME",
+                        "REGION_NAME",
+                        "POPULATION_GROUP_DESC",
+                        "INCIDENT_DATE",
+                        "TOTAL_OFFENDER_COUNT",
+                        "OFFENDER_RACE",
+                        "VICTIM_COUNT",
+                        "OFFENSE_NAME",
+                        "LOCATION_NAME",
+                        "BIAS_DESC",
+                        "VICTIM_TYPES",
+                        "MULTIPLE_OFFENSE",
+                        "MULTIPLE_BIAS")) %>%   # formatting data types
+mutate(INCIDENT_DATE = as_date(dmy(INCIDENT_DATE))) %>% #formatting factors
+   mutate(STATE_ABBR = as_factor(STATE_ABBR),
+          STATE_NAME = as_factor(STATE_NAME),
+          DIVISION_NAME = as_factor(DIVISION_NAME),
+          REGION_NAME = as_factor(REGION_NAME),
+          POPULATION_GROUP_DESC = as_factor(POPULATION_GROUP_DESC),
+          OFFENDER_RACE = as_factor(OFFENDER_RACE),
+          OFFENSE_NAME = as_factor(OFFENSE_NAME),
+          LOCATION_NAME = as_factor(LOCATION_NAME),
+          BIAS_DESC = as_factor(BIAS_DESC),
+          VICTIM_TYPES = as_factor(VICTIM_TYPES),
+          MULTIPLE_OFFENSE = as_factor(MULTIPLE_OFFENSE),
+          MULTIPLE_BIAS = as_factor(MULTIPLE_BIAS),
+          ) %>% drop_na(OFFENDER_RACE)
+  
+ 
+
+```
+
+ Total Number of Hate Crime Cases and  each Year
+```{r}
+hate_crimes %>%
+  group_by(year = year(INCIDENT_DATE), REGION_NAME) %>% 
+  summarise(totalHatecrimes = n()) %>% 
+  ggplot(aes(year, totalHatecrimes, color = REGION_NAME)) + geom_line()
+
+
+hate_crimes %>%
+  group_by(year = year(INCIDENT_DATE)) %>% 
+  summarise(totalHatecrimes = n()) %>% 
+  ggplot(aes(year, totalHatecrimes)) + geom_line()
+
+```
+Show total number of hate crimes, offenders and victims for each Region
+
+```{r}
+# I want plot all of thre on y axis. how?
+
+ggplotly(hate_crimes %>% 
+  group_by(REGION_NAME) %>% 
+  summarise(TotHateCrimes = n(),
+            TotOffenders = sum(TOTAL_OFFENDER_COUNT),
+            TotVictims = sum(VICTIM_COUNT)) %>% 
+  pivot_longer(cols = c('TotHateCrimes', 'TotOffenders', 'TotVictims'),
+               names_to = "Type", values_to = "total") %>% 
+  ggplot(aes(fct_reorder(REGION_NAME, total,.desc = TRUE), total, fill = as.factor(Type))) + geom_col(position = "dodge") )
+
+```
+
+
+
+
+Collapse levels of 'BIAS_DESC'
+```{r}
+
+
+#remove multiple BIAS from 'BIAS_DESC' column, because I am interest in single Bias. My goal is show
+#the overall amount of bias in general, that is why I do not need double bias: every bias will be in a #broad category
+
+  hate_crimes_BIAS_relevel <- hate_crimes %>% 
+    separate(BIAS_DESC, into = c("BIAS_DESC"), sep = ";") %>% 
+  mutate(BIAS_DESC = as_factor(BIAS_DESC)) %>% 
+  mutate(BIAS_DESC =
+           fct_collapse(BIAS_DESC,
+                           race_ethnicity = c("Anti-Black or African American",
+                                              "Anti-White",
+                                              "Anti-Arab",
+                                              "Anti-Asian",
+                                              "Anti-Hispanic or Latino",
+                                              "Anti-Other Race/Ethnicity/Ancestry",
+                                              "Anti-Multiple Races, Group",
+                                              "Anti-American Indian or Alaska Native",
+                                              "Anti-Native Hawaiian or Other Pacific Islander"),
+                        
+                          sexual_orientation = c("Anti-Gay (Male)",
+                                                 "Anti-Heterosexual",
+                                                 "Anti-Lesbian (Female)",
+                                        "Anti-Lesbian, Gay, Bisexual, or Transgender (Mixed Group)",
+                                                  "Anti-Bisexual"),
+                                           
+                            religion = c(
+                                          "Anti-Jewish",
+                                          "Anti-Protestant",
+                                          "Anti-Other Religion",
+                                          "Anti-Islamic (Muslim)",
+                                          "Anti-Catholic",
+                                          "Anti-Multiple Religions, Group",
+                                          "Anti-Atheism/Agnosticism",
+                                          "Anti-Jehovah's Witness",
+                                          "Anti-Mormon",
+                                          "Anti-Buddhist",
+                                          "Anti-Sikh",
+                                          "Anti-Other Christian",
+                                          "Anti-Hindu",
+                                          "Anti-Eastern Orthodox (Russian, Greek, Other)"),
+                                      
+                                      disability = c("Anti-Physical Disability",
+                                                      "Anti-Mental Disability"),
+
+
+                                      gender_identity = c("Anti-Gender Non-Conforming",
+                                                          "Anti-Transgender"),
+                                      gender = c("Anti-Female",
+                                                 "Anti-Male"),
+                        
+                               Unknown_motivation = "Unknown (offender's motivation not known)")) %>% 
+  drop_na(OFFENDER_RACE)
+
+
+
+```
+
+
+	Show overview of all Hate Crimes per bias motivation of singles Bias crimes
+	
+```{r}
+hate_crimes_BIAS_relevel %>% 
+  group_by(BIAS_DESC) %>% 
+  summarise(totalHatecrimes = n()) %>% 
+  mutate(percentage = round(totalHatecrimes/sum(totalHatecrimes) * 100 ,2)) %>% # transform in percentage
+  ggplot(aes(percentage, fct_reorder(BIAS_DESC, percentage), fill = BIAS_DESC)) + geom_col() 
+
+```
+	
+	Show number of Offenders Per Race
+	
+```{r}
+hate_crimes %>% 
+  group_by(OFFENDER_RACE) %>% 
+  summarise(nOfOffenders = sum(TOTAL_OFFENDER_COUNT)) %>% 
+  ggplot(aes(nOfOffenders, fct_reorder(OFFENDER_RACE, nOfOffenders))) + geom_point()
+ 
+
+```
+ Show total numbers of crimes, by comparing 2019 and 2020, per hate crime category # I can try line graph between 2019 and 2020 with month
+
+```{r}
+hate_crimes_BIAS_relevel %>% 
+  filter(year(INCIDENT_DATE) == '2019' | year(INCIDENT_DATE) == '2020') %>% 
+  group_by(year = year(INCIDENT_DATE), BIAS_DESC) %>% 
+  summarise(totalNumber = n()) %>% 
+  ggplot(aes(BIAS_DESC, totalNumber, fill = as.factor(year) )) + geom_col(position = "dodge")
+
+
+```
+# Number of hate crimes each Year per Region
+
+```{r}
+ perYear_Per_region <- hate_crimes_BIAS_relevel %>%
+  group_by(Year = year(INCIDENT_DATE), REGION_NAME) %>%
+  summarise(totCrimes = n()) %>%
+  pivot_wider(names_from = REGION_NAME,
+              values_from = totCrimes)
+
+ perYear_Per_region[c(1:5)]
+
+```
+
+
+
+Show Total Number of Hate Crimes per Bias where victims are groups (more than 10)
+```{r}
+ group_victim <- hate_crimes_BIAS_relevel %>%  filter(VICTIM_COUNT > 10) %>% count(VICTIM_COUNT,sort = TRUE)
+group_victim
+
+ group_victim_10 <- semi_join(hate_crimes_BIAS_relevel, group_victim)
+ 
+ group_victim_10 %>% 
+   group_by(BIAS_DESC) %>% 
+   summarise(totNum = n()) %>% 
+   ggplot(aes(fct_reorder(BIAS_DESC, totNum), totNum)) + geom_point()
+
+```
+
+
+
+
