@@ -44,8 +44,11 @@ The following **KPIs** were analyzed:
 ✔️ **Total number of hate crimes, offenders and victims for each Region**  
 ✔️ **Total Number of Hate Crime Cases each Year per Region**  
 ✔️ **Hate Crimes per bias motivation**  
-✔️ **Average time between hate crimes for different bias types**
+✔️ **Average time between hate crimes for different bias types**  
 ✔️ **Average days between two crimes Per Bias Type**
+
+---  
+
 
 ## 🔍 Data Sources  
 - **Dataset:** [Hate Crime Report (1991-2020) – Kaggle](https://www.kaggle.com/code/lewanfuowski/hate-crime-report-from-1991-to-2020/data)  
